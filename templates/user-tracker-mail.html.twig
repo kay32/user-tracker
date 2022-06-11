@@ -1,0 +1,56 @@
+{#
+/**
+ * @file
+ * Default theme implementation for user tracker email template.
+ *
+ * Available variables:
+ * - user_id: The ID of the modified user.
+ * - username: The username ID of the user.
+ * - fields: An array of fields that have been changed.
+ *   Each array element includes:
+ *   - label: Changed field label.
+ *   - values: Array of values changed fields.
+ *     Each array element includes:
+ *     - old: The old field value.
+ *     - new: The new field value.
+ *
+ * @ingroup themeable
+ */
+#}
+{% set default_styles = 'display: inline-block; padding: 2px 5px; border-radius: 3px; font-weight: 700;' %}
+{% set styles = {
+  'old': default_styles ~ 'background: #6c757d; color: #fff;',
+  'changed': default_styles ~ 'background: #ffc107; color: #212529;',
+  'added': default_styles ~ 'background: #28a745; color: #fff;',
+  'deleted': default_styles ~ 'background: #dc3545; color: #fff;',
+} %}
+
+<table style="font-family: monospace; text-align: left;
+    border-collapse: separate; border-spacing: 5px;">
+  <caption style="font-size: 1.5em">
+    {{ '@username (@user_id) was changed:'|t({'@username': username, '@user_id': user_id}) }}
+  </caption>
+  <tr>
+    <th>{{ 'Field'|t }}</th>
+    <th colspan="3">{{ 'Changes'|t }}</th>
+  </tr>
+  {% for field in fields|sort((a, b) => a.label <=> b.label) %}
+    {% for value in field.values %}
+      <tr>
+        <td>{{ loop.first ? field.label }}</td>
+        <td><span style="{{ styles['old'] }}">{{ value.old ?? '✕' }}</span></td>
+        <td>&nbsp;➡&nbsp;</td>
+        <td>
+          {% if value.old and value.new is empty %}
+            {% set type = 'deleted' %}
+          {% elseif value.old is empty and value.new %}
+            {% set type = 'added' %}
+          {% else %}
+            {% set type = 'changed' %}
+          {% endif %}
+          <span style="{{ styles[type] }}">{{ value.new ?? '✕' }}</span>
+        </td>
+      </tr>
+    {% endfor %}
+  {% endfor %}
+</table>

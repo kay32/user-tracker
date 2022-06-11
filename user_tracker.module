@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for User Tracker module.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\user_tracker\UserTracker;
+
+/**
+ * Implements hook_entity_update().
+ */
+function user_tracker_entity_update(EntityInterface $entity) {
+  switch ($entity->getEntityTypeId()) {
+    case 'user':
+    case 'profile':
+      \Drupal::classResolver(UserTracker::class)->mailChanges($entity);
+      break;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function user_tracker_theme($existing, $type, $theme, $path) {
+  return [
+    'user_tracker_mail' => [
+      'variables' => [
+        'user_id' => NULL,
+        'username' => NULL,
+        'fields' => [],
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_mail().
+ */
+function user_tracker_mail($key, &$message, $params) {
+  $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed';
+  $message['subject'] = $params['subject'];
+  $message['body'][] = $params['body'];
+}

@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - user
+  enforced:
+    module:
+      - user_tracker
+id: user.user_tracker
+label: 'User tracker'
+targetEntityType: user
+cache: true
